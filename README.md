@@ -33,9 +33,7 @@ It displays a target sentence, highlights your keystrokes in real time (green fo
 - As you type, each character is compared to the corresponding character in the target text. 
 - Correctly typed characters are shown in green; incorrect ones are shown in red. 
 - WPM is calculated using the formula: 
-
     WPM = (characters_typed / 5) / minutes_elapsed 
-
 - The program ends the test when: 
 - The user presses **ESC**, or 
 - The typed text exactly matches the target text in length and content. 
