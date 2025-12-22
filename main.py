@@ -1,12 +1,12 @@
-# Name: Typing Test
-# Description: A simple typing test application that measures typing speed and accuracy.
+# Name: main.py
+# Description: The entry point to a simple typing test application that measures typing speed and accuracy
 # Author: Sanika Surose
 
 import curses
 from curses import wrapper
 import time 
 import random
-from engine import create_session, process_key, calculate_wpm, build_char_states
+from engine import create_session, process_key, calculate_wpm, build_char_states, calculate_accuracy 
 
 # start_screen: display the start screen
 def start_screen(stdscr): 
@@ -60,6 +60,18 @@ def wpm_test(stdscr):
             stdscr.nodelay(False)
             break
          
+    stdscr.nodelay(False)
+    accuracy = calculate_accuracy(session)
+
+    stdscr.clear()
+    stdscr.addstr(0, 0, "Done!")
+    stdscr.addstr(1, 0, f"WPM: {calculate_wpm(session)}")
+    stdscr.addstr(2, 0, f"Accuracy: {accuracy}%")
+    stdscr.addstr(3, 0, f"Mistakes: {session['mistakes']}")
+    stdscr.addstr(5, 0, "Press any key to continue")
+    stdscr.refresh()
+    stdscr.getkey()
+
 # main: entry point
 def main(stdscr): 
     curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)    # color pair 1: green on black
@@ -70,7 +82,6 @@ def main(stdscr):
 
     while True: 
         wpm_test(stdscr)
-        stdscr.addstr(2, 0, "Done! Press any key to continue")
         key = stdscr.getkey()
 
         if ord(key) == 27: 

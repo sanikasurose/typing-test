@@ -1,32 +1,38 @@
-# 🧠 Typing Test (v1.1.0)
+# 🧠 Typing Test (v1.1.1)
 
 A lightweight, terminal-based speed typing test built with Python and the curses library.
-This version focuses on clean architecture and separation of concerns, laying the foundation for future AI and cloud-deployed features.
+This version introduces **accuracy tracking and mistake counting**, making the test behave more like real-world typing platforms.
 
-The program displays a target sentence, highlights keystrokes in real time (green for correct, red for incorrect), and calculates words-per-minute (WPM) as you type.
+The program displays a target sentence, highlights keystrokes in real time (green for correct, red for incorrect), calculates **words-per-minute (WPM)**, and reports **accuracy and mistakes** at the end of each test.
 
 ---
 
 ## ✨ Features 
-- Real‑time accuracy highlighting 
-- Live WPM calculation 
-- Randomized text selection from `text.txt` 
-- Non‑blocking input handling for smooth UI 
-- Modular codebase with separated logic and UI
+- Real-time per-character accuracy highlighting
+- Live WPM (words per minute) calculation
+- Typing accuracy percentage
+- Mistake counting
+- Randomized text selection from `text.txt`
+- Non-blocking input handling for smooth UI
+- Modular architecture with clear separation of logic and UI
 - Simple, clean terminal interface
 
 --- 
 
 ## 🎮 How to Play 
 
-1. Press any key to begin the typing test. 
-2. Type the displayed text exactly as it appears on the screen. 
-3. Characters you type will be highlighted: 
-    - **Green** for correct characters  
-    - **Red** for incorrect characters 
-4. Your WPM (words per minute) updates continuously as you type. 
-5. When you finish typing the entire line correctly, the test ends and displays **Done!** 
-6. Press any key to start a new test, or press **ESC** to exit the program.
+1. Press any key to begin the typing test.
+2. Type the displayed sentence as it appears on the screen.
+3. Characters you type are highlighted:
+   - **Green** → correct character  
+   - **Red** → incorrect character
+4. Your WPM updates continuously as you type.
+5. The test **ends automatically when you reach the end of the sentence**, regardless of mistakes.
+6. A results screen displays:
+   - Final WPM
+   - Accuracy percentage
+   - Total mistakes
+7. Press any key to start a new test, or press **ESC** to exit.
 
 --- 
 
@@ -34,56 +40,65 @@ The program displays a target sentence, highlights keystrokes in real time (gree
 
 ### Project Structure
 - **`main.py`**
-  - Handles all terminal UI rendering using the `curses` library  
-  - Manages user input, screen updates, and overall program flow  
+  - Handles all terminal UI rendering using the `curses` library
+  - Displays text, colors, stats, and results
+  - Manages user input and program flow
   
 - **`engine.py`**
-  - Contains the core typing logic  
-  - Determines per-character typing states (`correct`, `incorrect`, `untyped`)  
-  - Keeps business logic separate from UI logic  
+  - Contains all typing logic and state management
+  - Tracks keystrokes, mistakes, and timing
+  - Calculates WPM and accuracy
+  - Determines when a typing session is finished
 
-This separation improves readability, maintainability, and makes future extensions (GUI, AI, cloud) much easier.
+This separation keeps the codebase clean, readable, and easy to extend.
 
 ### Typing Logic
-- A random line is loaded from `text.txt` and used as the target phrase  
-- As the user types, each character is compared against the target text  
-- Character states are computed in `engine.py` and rendered in `main.py`  
+- A random line is loaded from `text.txt` and used as the target phrase
+- Each keystroke:
+  - Advances the cursor
+  - Is counted toward total keystrokes
+  - Is compared against the expected character
+- Mistakes are counted immediately and **not undone by backspacing**
+- Accuracy is calculated using: accuracy = (correct_keystrokes / total_keystrokes) × 100
 - WPM is calculated using: WPM = (characters_typed / 5) / minutes_elapsed
 - The test ends when:
-  - The user presses **ESC**, or  
-  - The typed text exactly matches the target text  
+  - The user presses **ESC**, or
+  - The user types the full length of the target sentence
 
 ---
 
 ## 🚀 Learning Goals & Future Vision
 
-This project is designed as a **hands-on learning experience**, not just a small console application.
+This project is intentionally structured as a **learning-focused, scalable application**, not just a small script.
 
 ### What I’ve Learned So Far
-- Structuring a project with clear separation of concerns  
-- Designing reusable logic independent of UI implementation  
-- Working with terminal-based UIs using `curses`  
-- Writing meaningful commit messages, tags, and release notes  
+- Designing clean project architecture with separation of concerns
+- Managing application state independently of UI
+- Implementing real-time input handling with `curses`
+- Tracking meaningful performance metrics (WPM, accuracy, mistakes)
+- Using Git professionally (commits, tags, releases, README-driven development)
 
 ### Future Enhancements
-- **Personal AI Typing Coach**
-  - Analyze typing patterns and common mistakes  
-  - Suggest targeted practice exercises and improvements  
+- **Typing Analytics**
+  - Per-character accuracy breakdown
+  - Heatmaps of weak keys
+  - Historical performance tracking
 
-- **Cloud Deployment**
-  - Deploy the final application on the cloud  
-  - Enable user progress tracking and persistence  
+- **Personal AI Typing Coach**
+  - Analyze typing patterns and recurring mistakes
+  - Recommend targeted practice sessions
 
 - **GUI Version**
-  - Transition from a terminal-based interface to a full graphical UI  
+  - Transition from terminal UI to a graphical interface (Tkinter / PyQt / Web)
 
-- **Internship-Ready Skills**
-  - Modular design patterns  
-  - Scalable architecture  
-  - Real-world development workflows 
+- **Cloud Deployment**
+  - User accounts
+  - Saved progress
+  - Leaderboards and statistics
 
 --- 
 
-**Author:** Sanika Surose  
-**Next milestone:** v1.2.0 → typing analytics & performance tracking
-**Long-term goal:** cloud-hosted, AI-assisted typing platform
+**Author:** Sanika Surose    
+**Current version:** v1.1.1    
+**Next milestone:** v1.2.0 → deeper typing analytics   
+**Long-term goal:** cloud-hosted, AI-assisted typing platform  

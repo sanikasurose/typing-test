@@ -11,21 +11,33 @@ def create_session():
         "target_text": load_text(),
         "current_text": [],
         "start_time": time.time(),
-        "finished": False
+        "finished": False,
+        "mistakes": 0,
+        "total_keystrokes": 0
     }
+
+# load_text: loads target text from text.txt file
+def load_text():
+	with open("text.txt", "r") as f:
+		lines = f.readlines()
+		return random.choice(lines).strip()
 
 # process_key: updates session state based on the given key input (handles typing and backspace)
 def process_key(session, key):
+
     if key in ("KEY_BACKSPACE", "\b", "\x7f"):
         if session["current_text"]:
             session["current_text"].pop()
+
     elif len(session["current_text"]) < len(session["target_text"]):
+        expected = session["target_text"][len(session["current_text"])]
         session["current_text"].append(key)
 
-    if (
-        len(session["current_text"]) == len(session["target_text"])
-        and "".join(session["current_text"]) == session["target_text"]
-    ):
+        session["total_keystrokes"] += 1
+        if key != expected:
+            session["mistakes"] += 1
+
+    if len(session["current_text"]) == len(session["target_text"]):
         session["finished"] = True
 
 # calculate_wpm: calculates the wpm for the current session
@@ -33,12 +45,12 @@ def calculate_wpm(session):
     elapsed = max(time.time() - session["start_time"], 1)
     return round((len(session["current_text"]) / (elapsed / 60)) / 5)
 
-
-# load_text: loads target text from text.txt file
-def load_text():
-	with open("text.txt", "r") as f:
-		lines = f.readlines()
-		return random.choice(lines).strip()
+# calculate_accuracy: calculates and returns the typing accuracy percentage for the current session
+def calculate_accuracy(session):
+    if session["total_keystrokes"] == 0:
+        return 100.0
+    correct = session["total_keystrokes"] - session["mistakes"]
+    return round((correct / session["total_keystrokes"]) * 100, 2)
 
 # build_char_states: decides if current character user is typing is correct or not
 def build_char_states(target_text, current_text): 
