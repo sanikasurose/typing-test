@@ -1,7 +1,9 @@
-# 🧠 Typing Test (v1.0.0)
+# 🧠 Typing Test (v1.1.0)
 
-A lightweight, terminal‑based **speed typing test** built with Python and the `curses` library. 
-It displays a target sentence, highlights your keystrokes in real time (green for correct, red for incorrect), and calculates your words‑per‑minute (WPM) as you type. 
+A lightweight, terminal-based speed typing test built with Python and the curses library.
+This version focuses on clean architecture and separation of concerns, laying the foundation for future AI and cloud-deployed features.
+
+The program displays a target sentence, highlights keystrokes in real time (green for correct, red for incorrect), and calculates words-per-minute (WPM) as you type.
 
 ---
 
@@ -10,6 +12,7 @@ It displays a target sentence, highlights your keystrokes in real time (green fo
 - Live WPM calculation 
 - Randomized text selection from `text.txt` 
 - Non‑blocking input handling for smooth UI 
+- Modular codebase with separated logic and UI
 - Simple, clean terminal interface
 
 --- 
@@ -29,16 +32,58 @@ It displays a target sentence, highlights your keystrokes in real time (green fo
 
 ## 🧩 How It Works
 
-- The program loads a random line of text from `text.txt` to use as the target phrase. 
-- As you type, each character is compared to the corresponding character in the target text. 
-- Correctly typed characters are shown in green; incorrect ones are shown in red. 
-- WPM is calculated using the formula: 
-    WPM = (characters_typed / 5) / minutes_elapsed 
-- The program ends the test when: 
-- The user presses **ESC**, or 
-- The typed text exactly matches the target text in length and content. 
+### Project Structure
+- **`main.py`**
+  - Handles all terminal UI rendering using the `curses` library  
+  - Manages user input, screen updates, and overall program flow  
+  
+- **`engine.py`**
+  - Contains the core typing logic  
+  - Determines per-character typing states (`correct`, `incorrect`, `untyped`)  
+  - Keeps business logic separate from UI logic  
+
+This separation improves readability, maintainability, and makes future extensions (GUI, AI, cloud) much easier.
+
+### Typing Logic
+- A random line is loaded from `text.txt` and used as the target phrase  
+- As the user types, each character is compared against the target text  
+- Character states are computed in `engine.py` and rendered in `main.py`  
+- WPM is calculated using: WPM = (characters_typed / 5) / minutes_elapsed
+- The test ends when:
+  - The user presses **ESC**, or  
+  - The typed text exactly matches the target text  
+
+---
+
+## 🚀 Learning Goals & Future Vision
+
+This project is designed as a **hands-on learning experience**, not just a small console application.
+
+### What I’ve Learned So Far
+- Structuring a project with clear separation of concerns  
+- Designing reusable logic independent of UI implementation  
+- Working with terminal-based UIs using `curses`  
+- Writing meaningful commit messages, tags, and release notes  
+
+### Future Enhancements
+- **Personal AI Typing Coach**
+  - Analyze typing patterns and common mistakes  
+  - Suggest targeted practice exercises and improvements  
+
+- **Cloud Deployment**
+  - Deploy the final application on the cloud  
+  - Enable user progress tracking and persistence  
+
+- **GUI Version**
+  - Transition from a terminal-based interface to a full graphical UI  
+
+- **Internship-Ready Skills**
+  - Modular design patterns  
+  - Scalable architecture  
+  - Real-world development workflows 
 
 --- 
 
 **Author:** Sanika Surose  
-*Note:* v2.0.0 will be a GUI version
+**Next milestone:** v1.2.0 → typing analytics & performance tracking
+**Long-term goal:** cloud-hosted, AI-assisted typing platform
