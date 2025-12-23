@@ -6,7 +6,7 @@ import curses
 from curses import wrapper
 import time 
 import random
-from engine import create_session, process_key, calculate_wpm, build_char_states, calculate_accuracy 
+import engine
 
 # start_screen: display the start screen
 def start_screen(stdscr): 
@@ -15,7 +15,6 @@ def start_screen(stdscr):
     stdscr.addstr("\nPress any key to begin")
     stdscr.refresh()
     stdscr.getkey()                                              
-
 
 # display_text: displays the target and current text with color feedback for correctness
 def display_text(stdscr, char_states, wpm):
@@ -33,44 +32,84 @@ def display_text(stdscr, char_states, wpm):
 
     stdscr.refresh()
 
-
-# wpm_test: handles the typing test and user input loop
-def wpm_test(stdscr): 
-    session = create_session()
-    stdscr.nodelay(True)
-
-    while True:
-        wpm = calculate_wpm(session)
-        char_states = build_char_states(session["target_text"], session["current_text"])
-
-        display_text(stdscr, char_states, wpm)
-
-        try: 
-            key = stdscr.getkey()
-        except: 
-            time.sleep(0.01)
-            continue
-    
-        if ord(key) == 27:
-            break
-    
-        process_key(session, key)
-
-        if session["finished"]:
-            stdscr.nodelay(False)
-            break
-         
-    stdscr.nodelay(False)
-    accuracy = calculate_accuracy(session)
+# show_results: displays final statistics after a test finishes
+def show_results(stdscr, session):
+    accuracy = engine.calculate_accuracy(session)
+    top_mistakes = engine.get_top_mistakes(session)
+    avg_delay = engine.get_average_key_delay(session)
 
     stdscr.clear()
-    stdscr.addstr(0, 0, "Done!")
-    stdscr.addstr(1, 0, f"WPM: {calculate_wpm(session)}")
-    stdscr.addstr(2, 0, f"Accuracy: {accuracy}%")
-    stdscr.addstr(3, 0, f"Mistakes: {session['mistakes']}")
-    stdscr.addstr(5, 0, "Press any key to continue")
+    row = 0
+
+    stdscr.addstr(row, 0, "Done!")
+    row += 1
+
+    stdscr.addstr(row, 0, f"WPM: {engine.calculate_wpm(session)}")
+    row += 1
+
+    stdscr.addstr(row, 0, f"Accuracy: {accuracy}%")
+    row += 1
+
+    stdscr.addstr(row, 0, f"Mistakes: {session['mistakes']}")
+    row += 2
+
+    stdscr.addstr(row, 0, "Top Mistakes:")
+    row += 1
+
+    if top_mistakes:
+        for char, count in top_mistakes:
+            stdscr.addstr(row, 2, f"'{char}' → {count}")
+            row += 1
+    else:
+        stdscr.addstr(row, 2, "No mistakes 🎉")
+        row += 1
+
+    row += 1
+    stdscr.addstr(row, 0, f"Avg key delay: {avg_delay:.2f}s")
+    row += 2
+
+    height, _ = stdscr.getmaxyx()
+    if row < height:
+        stdscr.addstr(row, 0, "Press any key to continue")
+    else:
+        stdscr.addstr(height - 1, 0, "Press any key to continue")
+
     stdscr.refresh()
     stdscr.getkey()
+
+# is_escape: returns if the key pressed was escape or not
+def is_escape(key):
+    return (len(key) == 1 and ord(key) == 27) or key == '\x1b' or key.startswith('\x1b')
+
+# wpm_test: runs a single typing test session
+def wpm_test(stdscr):
+    session = engine.create_session()
+    stdscr.nodelay(True)
+    quit_early = False
+
+    while True:
+        wpm = engine.calculate_wpm(session)
+        char_states = engine.build_char_states(
+            session["target_text"],
+            session["current_text"]
+        )
+        display_text(stdscr, char_states, wpm)
+        try:
+            key = stdscr.getkey()
+        except:
+            time.sleep(0.01)
+            continue
+        # ESC ends test early
+        if is_escape(key):
+            quit_early = True
+            break
+        engine.process_key(session, key)
+        # end when sentence length reached
+        if session["finished"]:
+            break
+    stdscr.nodelay(False)
+    show_results(stdscr, session)
+    return quit_early
 
 # main: entry point
 def main(stdscr): 
@@ -80,11 +119,12 @@ def main(stdscr):
 
     start_screen(stdscr)
 
-    while True: 
-        wpm_test(stdscr)
+    while True:
+        quit_early = wpm_test(stdscr)
+        if quit_early:
+            break
         key = stdscr.getkey()
-
-        if ord(key) == 27: 
+        if is_escape(key):
             break
 
 # wrapper: takes a function and runs it in a curses window

@@ -1,17 +1,19 @@
-# 🧠 Typing Test (v1.1.1)
+# 🧠 Typing Test (v1.2.0)
 
-A lightweight, terminal-based speed typing test built with Python and the curses library.
-This version introduces **accuracy tracking and mistake counting**, making the test behave more like real-world typing platforms.
+A lightweight, terminal-based speed typing test built with Python and the `curses` library.
+This version introduces typing analytics, including per-character mistake tracking and keystroke timing analysis, making the test closer to professional typing platforms.
 
-The program displays a target sentence, highlights keystrokes in real time (green for correct, red for incorrect), calculates **words-per-minute (WPM)**, and reports **accuracy and mistakes** at the end of each test.
+The program displays a target sentence, highlights keystrokes in real time (green for correct, red for incorrect), calculates words-per-minute (WPM), and reports accuracy, mistakes, and typing statistics at the end of each test.
 
 ---
 
 ## ✨ Features 
 - Real-time per-character accuracy highlighting
 - Live WPM (words per minute) calculation
-- Typing accuracy percentage
-- Mistake counting
+- Typing accuracy percentage based on total keystrokes
+- Mistake counting (not undone by backspacing)
+- Per-character mistake analytics (top problem keys)
+- Average keystroke delay tracking
 - Randomized text selection from `text.txt`
 - Non-blocking input handling for smooth UI
 - Modular architecture with clear separation of logic and UI
@@ -24,15 +26,17 @@ The program displays a target sentence, highlights keystrokes in real time (gree
 1. Press any key to begin the typing test.
 2. Type the displayed sentence as it appears on the screen.
 3. Characters you type are highlighted:
-   - **Green** → correct character  
-   - **Red** → incorrect character
+  - Green → correct character
+  - Red → incorrect character
 4. Your WPM updates continuously as you type.
-5. The test **ends automatically when you reach the end of the sentence**, regardless of mistakes.
+5. The test ends automatically when you reach the end of the sentence, regardless of mistakes.
 6. A results screen displays:
-   - Final WPM
-   - Accuracy percentage
-   - Total mistakes
-7. Press any key to start a new test, or press **ESC** to exit.
+  - Final WPM
+  - Accuracy percentage
+  - Total mistakes
+  - Top mistyped characters
+  - Average delay between key presses
+7. Press any key to start a new test, or press ESC to exit.
 
 --- 
 
@@ -45,9 +49,10 @@ The program displays a target sentence, highlights keystrokes in real time (gree
   - Manages user input and program flow
   
 - **`engine.py`**
-  - Contains all typing logic and state management
-  - Tracks keystrokes, mistakes, and timing
-  - Calculates WPM and accuracy
+  - Contains all typing logic and session state
+  - Tracks keystrokes, mistakes, and per-character errors
+  - Records timing between key presses
+  - Calculates WPM, accuracy, and analytics
   - Determines when a typing session is finished
 
 This separation keeps the codebase clean, readable, and easy to extend.
@@ -58,6 +63,7 @@ This separation keeps the codebase clean, readable, and easy to extend.
   - Advances the cursor
   - Is counted toward total keystrokes
   - Is compared against the expected character
+  - Records timing data for analytics
 - Mistakes are counted immediately and **not undone by backspacing**
 - Accuracy is calculated using: accuracy = (correct_keystrokes / total_keystrokes) × 100
 - WPM is calculated using: WPM = (characters_typed / 5) / minutes_elapsed
@@ -76,6 +82,7 @@ This project is intentionally structured as a **learning-focused, scalable appli
 - Managing application state independently of UI
 - Implementing real-time input handling with `curses`
 - Tracking meaningful performance metrics (WPM, accuracy, mistakes)
+- Implementing basic typing analytics (error frequency, timing)
 - Using Git professionally (commits, tags, releases, README-driven development)
 
 ### Future Enhancements
@@ -98,7 +105,7 @@ This project is intentionally structured as a **learning-focused, scalable appli
 
 --- 
 
-**Author:** Sanika Surose    
-**Current version:** v1.1.1    
-**Next milestone:** v1.2.0 → deeper typing analytics   
+**Author:** Sanika Surose     
+**Current version:** v1.2.0  
+**Next milestone:** v1.3.0 → session history & progress tracking   
 **Long-term goal:** cloud-hosted, AI-assisted typing platform  
