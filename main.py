@@ -94,6 +94,32 @@ def show_feedback_screen(stdscr, session):
     stdscr.refresh()
     stdscr.getkey()
 
+# show_progress_screen: displays the user's typing progress and stats across all saved sessions
+def show_progress_screen(stdscr):
+    stats = engine.get_progress_stats()
+
+    stdscr.clear()
+    row = 0
+
+    stdscr.addstr(row, 0, "Progress Summary")
+    row += 2
+
+    if not stats:
+        stdscr.addstr(row, 0, "No history yet. Complete more tests!")
+    else:
+        stdscr.addstr(row, 0, f"Total tests: {stats['total_tests']}")
+        row += 1
+        stdscr.addstr(row, 0, f"Best WPM: {stats['best_wpm']}")
+        row += 1
+        stdscr.addstr(row, 0, f"Average WPM: {stats['avg_wpm']}")
+        row += 1
+        stdscr.addstr(row, 0, f"Average Accuracy: {stats['avg_accuracy']}%")
+
+    row += 2
+    stdscr.addstr(row, 0, "Press any key to continue")
+    stdscr.refresh()
+    stdscr.getkey()
+
 # is_escape: returns if the key pressed was escape or not
 def is_escape(key):
     return (len(key) == 1 and ord(key) == 27) or key == '\x1b' or key.startswith('\x1b')
@@ -124,9 +150,17 @@ def wpm_test(stdscr):
         # end when sentence length reached
         if session["finished"]:
             break
+    
     stdscr.nodelay(False)
+
+    # save completed session
+    if session["finished"]:
+        engine.save_session(session)
+
     show_results(stdscr, session)
     show_feedback_screen(stdscr, session)
+    show_progress_screen(stdscr)
+
     return quit_early
 
 # main: entry point

@@ -4,6 +4,12 @@
 
 import random
 import time
+import json
+import os
+
+# constants
+SESSION_FILE = "sessions.json"
+
 
 # create_session: initializes and returns a new typing test session dictionary with all state
 def create_session():
@@ -163,3 +169,47 @@ def get_actionable_tip(session):
         return "Great balance — keep practicing consistency"
     else:
         return "Practice common word patterns and transitions"
+
+
+# load_sessions: loads and returns the list of all saved typing test sessions from file
+def load_sessions():
+    if not os.path.exists(SESSION_FILE):
+        return []
+    with open(SESSION_FILE, "r") as f:
+        return json.load(f)
+
+
+# save_session: saves the current typing test session summary to the sessions file
+def save_session(session):
+    sessions = load_sessions()
+
+    record = {
+        "timestamp": time.time(),
+        "wpm": calculate_wpm(session),
+        "accuracy": calculate_accuracy(session),
+        "mistakes": session["mistakes"]
+    }
+
+    sessions.append(record)
+
+    with open(SESSION_FILE, "w") as f:
+        json.dump(sessions, f, indent=2)
+
+
+# get_progress_stats: computes and returns summary statistics about the user's typing progress across all sessions
+def get_progress_stats():
+    sessions = load_sessions()
+    if not sessions:
+        return None
+
+    total = len(sessions)
+    best_wpm = max(s["wpm"] for s in sessions)
+    avg_wpm = round(sum(s["wpm"] for s in sessions) / total, 1)
+    avg_acc = round(sum(s["accuracy"] for s in sessions) / total, 1)
+
+    return {
+        "total_tests": total,
+        "best_wpm": best_wpm,
+        "avg_wpm": avg_wpm,
+        "avg_accuracy": avg_acc
+    }
