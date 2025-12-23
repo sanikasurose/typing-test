@@ -110,3 +110,56 @@ def get_average_key_delay(session):
         return 0.0
 
     return round(sum(delays) / len(delays), 3)
+
+# get_performance_profile: classifies overall typing performance based on WPM and accuracy
+def get_performance_profile(session):
+    wpm = calculate_wpm(session)
+    accuracy = calculate_accuracy(session)
+
+    if wpm >= 60 and accuracy >= 95:
+        return "Balanced"
+    elif wpm >= 60 and accuracy < 95:
+        return "Fast but inaccurate"
+    elif wpm < 40 and accuracy >= 95:
+        return "Accurate but slow"
+    else: 
+        return "Needs consistency"
+
+# get_weak_keys: returns the most frequently mistyped characters
+def get_weak_keys(session, limit=3):
+    errors = session.get("char_errors", {})
+    if not errors:
+        return []
+
+    return sorted(errors.items(), key=lambda x: x[1], reverse=True)[:limit]
+
+# get_speed_feedback: analyzes typing consistency using key delay variance
+def get_speed_feedback(session):
+    delays = []
+    for times in session.get("char_timings", {}).values():
+        delays.extend(times)
+
+    if len(delays) < 5:
+        return "Not enough data"
+
+    avg = sum(delays) / len(delays)
+    variance = sum((d - avg) ** 2 for d in delays) / len(delays)
+
+    if variance < 0.01:
+        return "Consistent typing speed"
+    else:
+        return "Inconsistent typing speed"
+
+# get_actionable_tip: provides a short recommendation based on accuracy and speed
+def get_actionable_tip(session):
+    wpm = calculate_wpm(session)
+    accuracy = calculate_accuracy(session)
+
+    if accuracy < 90:
+        return "Slow down slightly to improve accuracy"
+    elif wpm < 40:
+        return "Focus on building speed with accuracy"
+    elif accuracy >= 95 and wpm >= 60:
+        return "Great balance — keep practicing consistency"
+    else:
+        return "Practice common word patterns and transitions"

@@ -35,8 +35,6 @@ def display_text(stdscr, char_states, wpm):
 # show_results: displays final statistics after a test finishes
 def show_results(stdscr, session):
     accuracy = engine.calculate_accuracy(session)
-    top_mistakes = engine.get_top_mistakes(session)
-    avg_delay = engine.get_average_key_delay(session)
 
     stdscr.clear()
     row = 0
@@ -53,27 +51,46 @@ def show_results(stdscr, session):
     stdscr.addstr(row, 0, f"Mistakes: {session['mistakes']}")
     row += 2
 
-    stdscr.addstr(row, 0, "Top Mistakes:")
+    stdscr.addstr(row, 0, "Press any key to view feedback")
+    stdscr.refresh()
+    stdscr.getkey()
+
+
+# show_feedback_screen: displays post-test feedback and personalized tips for improvement
+def show_feedback_screen(stdscr, session):
+    profile = engine.get_performance_profile(session)
+    weak_keys = engine.get_weak_keys(session)
+    speed_feedback = engine.get_speed_feedback(session)
+    tip = engine.get_actionable_tip(session)
+    avg_delay = engine.get_average_key_delay(session)
+
+    stdscr.clear()
+    row = 0
+
+    stdscr.addstr(row, 0, "Performance Feedback")
+    row += 2
+
+    stdscr.addstr(row, 0, f"Profile: {profile}")
     row += 1
 
-    if top_mistakes:
-        for char, count in top_mistakes:
-            stdscr.addstr(row, 2, f"'{char}' → {count}")
-            row += 1
+    stdscr.addstr(row, 0, f"Typing consistency: {speed_feedback}")
+    row += 2
+
+    if weak_keys:
+        keys = ", ".join(char for char, _ in weak_keys)
+        stdscr.addstr(row, 0, f"Weak keys: {keys}")
+        row += 1
     else:
-        stdscr.addstr(row, 2, "No mistakes 🎉")
+        stdscr.addstr(row, 0, "Weak keys: None 🎉")
         row += 1
 
-    row += 1
     stdscr.addstr(row, 0, f"Avg key delay: {avg_delay:.2f}s")
     row += 2
 
-    height, _ = stdscr.getmaxyx()
-    if row < height:
-        stdscr.addstr(row, 0, "Press any key to continue")
-    else:
-        stdscr.addstr(height - 1, 0, "Press any key to continue")
+    stdscr.addstr(row, 0, f"Tip: {tip}")
+    row += 2
 
+    stdscr.addstr(row, 0, "Press any key to continue")
     stdscr.refresh()
     stdscr.getkey()
 
@@ -109,6 +126,7 @@ def wpm_test(stdscr):
             break
     stdscr.nodelay(False)
     show_results(stdscr, session)
+    show_feedback_screen(stdscr, session)
     return quit_early
 
 # main: entry point
