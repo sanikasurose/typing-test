@@ -176,7 +176,11 @@ def load_sessions():
     if not os.path.exists(SESSION_FILE):
         return []
     with open(SESSION_FILE, "r") as f:
-        return json.load(f)
+        try:
+            return json.load(f)
+        except json.JSONDecodeError:
+            # File is empty or corrupt; treat as no sessions
+            return []
 
 
 # save_session: saves the current typing test session summary to the sessions file
