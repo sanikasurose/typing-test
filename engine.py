@@ -11,7 +11,7 @@ import os
 SESSION_FILE = "sessions.json"
 
 
-# create_session: initializes and returns a new typing test session dictionary with all state
+# create_session: initializes and returns a new typing test session dictionary with all states
 def create_session():
     return {
         "target_text": load_text(),
