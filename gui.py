@@ -52,7 +52,7 @@ class TypingTest:
         self.typing_screen.show()
 
     # show_results: shows the results screen
-    def show_results(self): 
+    def show_results(self, session): 
         self._hide_all()
         self.results_screen.load_session(session)
         self.results_screen.show()
@@ -195,7 +195,7 @@ class ResultsScreen:
         self.title = ctk.CTkLabel(self.frame, text="Performance Feedback", font=ctk.CTkFont(size=26, weight="bold"))
         self.title.pack(pady=20)
 
-        self.body = ctk.CTkLabel(self.frame, text="", font=ctk.CTkFont(size=16, justify="left"))
+        self.body = ctk.CTkLabel(self.frame, text="", font=ctk.CTkFont(size=16), justify="left")
         self.body.pack(pady=10)
 
         self.continue_button = ctk.CTkButton(self.frame, text="Continue", width=200, height=40, command=self.app.show_progress)
@@ -203,6 +203,9 @@ class ResultsScreen:
 
     def load_session(self, session): 
         self.session = session
+
+        wpm = engine.calculate_wpm(session)
+        accuracy = engine.calculate_accuracy(session)
 
         profile = engine.get_performance_profile(session)
         consistency = engine.get_speed_feedback(session)
@@ -213,6 +216,8 @@ class ResultsScreen:
         weak_keys_str = ", ".join(k for k, _ in weak_keys) if weak_keys else "None"
         
         text = (
+            f"WPM: {wpm}\n"
+            f"Accuracy: {accuracy}%\n"
             f"Profile: {profile}\n"
             f"Typing Consistency: {consistency}\n\n"
             f"Weak Keys: {weak_keys_str}\n"
