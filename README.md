@@ -1,90 +1,96 @@
-# 🧠 Typing Test (v1.4.0)
+# 🧠 Typing Test (v2.0.0)
 
-A lightweight, terminal-based speed typing test built with Python and the `curses` library.  
-This version introduces **practice mode and targeted drills**, allowing users to actively improve weak keys instead of just viewing performance stats.
+A feature-rich **graphical typing trainer** built with Python and **CustomTkinter**, fully migrated from a terminal-based application into a modern, multi-screen GUI.
 
-The program displays a target sentence, highlights keystrokes in real time (green for correct, red for incorrect), calculates words-per-minute (WPM), and presents **multiple post-test screens**, including detailed feedback and optional focused practice.
+This version preserves **all analytics, feedback, and progress-tracking features** from v1.x while introducing a clean visual workflow with intentional screen transitions and improved usability.
 
 ---
 
 ## ✨ Features
 
+- Full graphical user interface (CustomTkinter)
 - Real-time per-character accuracy highlighting
 - Live WPM (words per minute) calculation
 - Typing accuracy percentage based on total keystrokes
 - Mistake counting (not undone by backspacing)
 - Per-character mistake analytics (top problem keys)
 - Average keystroke delay tracking
-- **Dedicated post-test feedback screen**
-- **Practice mode with targeted drills**
-- Weak-key–focused text generation
+- **Dedicated results screen**
+- **Multi-screen feedback flow**
 - Session-based progress tracking
+- Persistent session history (`sessions.json`)
 - Randomized text selection from `text.txt`
-- Non-blocking input handling for smooth UI
+- Keyboard-driven input (no mouse required during typing)
 - Modular architecture with clean separation of logic and UI
-- Simple, clean terminal interface
+- Dark-mode, distraction-free interface
 
 --- 
 
-## 🎮 How to Play 
+## 🎮 How to Play
 
-1. Press any key to begin the typing test.
-2. Type the displayed sentence as it appears on the screen.
-3. Characters you type are highlighted:
+1. Launch the application.
+2. Click **Start** on the welcome screen.
+3. Type the displayed sentence as it appears on the screen.
+4. Characters you type are highlighted:
    - **Green** → correct character
    - **Red** → incorrect character
-4. Your WPM updates continuously as you type.
-5. The test ends automatically when you reach the end of the sentence, regardless of mistakes.
-6. A **dedicated results screen** appears showing:
+5. Your WPM updates continuously as you type.
+6. The test ends automatically when you reach the end of the sentence.
+7. A **dedicated results screen** appears showing:
    - Final WPM
    - Accuracy percentage
    - Total mistakes
-   - Top mistyped characters
-   - Average delay between key presses
-7. From the results screen, you may:
-   - Start a **targeted practice session**
-   - Begin a new typing test
-   - Exit the program
+8. Press **Enter** to continue to the **progress summary screen**, which displays long-term stats across all sessions.
 
 ---
 
-## 🧠 Practice Mode
+## 🧠 Feedback & Analytics
 
-Practice mode uses your typing history to generate **focused drills** targeting your weakest keys.
+Each test is analyzed to provide meaningful feedback beyond raw numbers.
 
-- Text is dynamically generated based on:
-  - Most frequently mistyped characters
-  - Error patterns from past sessions
-- Helps reinforce muscle memory
-- Turns analytics into **actionable improvement**
+- Performance profile classification:
+  - Balanced
+  - Fast but inaccurate
+  - Accurate but slow
+  - Needs consistency
+- Weak-key detection (most frequently mistyped characters)
+- Typing consistency analysis using keystroke timing variance
+- Actionable improvement tips based on speed and accuracy
 
-This transforms the project from a typing test into a **learning tool**.
+This ensures users understand **how** they type — not just **how fast**.
 
 --- 
 
 ## 🧩 How It Works
 
 ### Project Structure
-- **`main.py`**
-  - Handles all terminal UI rendering using the `curses` library
-  - Manages screen transitions:
+
+- **`gui.py`**
+  - Handles all GUI rendering and screen transitions
+  - Manages:
+    - Start screen
     - Typing screen
     - Results screen
-    - Practice screen
-  - Displays live stats, feedback, and coaching prompts
-  - Controls program flow and user input
+    - Progress summary screen
+  - Handles keyboard events and UI updates
+  - Controls application flow
 
 - **`engine.py`**
-  - Contains all typing logic and session state
-  - Tracks keystrokes, mistakes, and per-character errors
-  - Records timing between key presses
-  - Calculates WPM, accuracy, and analytics
-  - Generates practice drills based on weak keys
-  - Manages session persistence (`sessions.json`)
+  - Contains all typing logic and analytics
+  - Tracks:
+    - Keystrokes
+    - Mistakes
+    - Per-character errors
+    - Keystroke timing
+  - Calculates WPM, accuracy, and feedback
+  - Manages persistent session storage (`sessions.json`)
 
-This separation keeps the codebase readable, maintainable, and easy to extend.
+This separation keeps the codebase clean, testable, and scalable.
+
+---
 
 ### Typing Logic
+
 - A random line is loaded from `text.txt` and used as the target phrase
 - Each keystroke:
   - Advances the cursor
@@ -96,48 +102,47 @@ This separation keeps the codebase readable, maintainable, and easy to extend.
   **accuracy = (correct_keystrokes / total_keystrokes) × 100**
 - WPM is calculated using:  
   **WPM = (characters_typed / 5) / minutes_elapsed**
-- The test ends when:
-  - The user presses **ESC**, or
-  - The user types the full length of the target sentence
-- Results and practice options are displayed on **separate, clean UI screens**
-
+- The test ends when the full target sentence is typed
+- Results, feedback, and progress are displayed on **separate, focused screens**
 
 ---
 
 ## 🚀 Learning Goals & Future Vision
 
-This project is intentionally designed as a **learning-focused, scalable application**, not just a small script.
+This project is intentionally designed as a **learning-focused, extensible application**, not just a typing test.
 
 ### What I’ve Learned So Far
-- Designing clean project architecture with separation of concerns
+- Designing clean application architecture with separation of concerns
 - Managing application state independently of UI
-- Implementing real-time input handling with `curses`
-- Tracking meaningful performance metrics (WPM, accuracy, mistakes)
-- Building typing analytics (error frequency, timing, weak keys)
-- Designing multi-screen terminal UIs
-- Turning analytics into interactive practice workflows
+- Event-driven input handling in GUI applications
+- Persisting user data across sessions
+- Building typing analytics (errors, timing, consistency)
+- Designing intentional multi-screen UX flows
+- Migrating a terminal application to a full GUI
 - Using Git professionally (commits, tags, releases, README-driven development)
 
 ### Future Enhancements
+- **Practice Mode**
+  - Targeted drills based on weak keys
+  - Focused repetition without timing pressure
+
 - **Advanced Analytics Dashboard**
-  - Per-key accuracy heatmaps
-  - Long-term improvement trends
+  - Long-term trends
+  - Visual performance breakdowns
 
-- **Personal AI Typing Coach**
-  - Pattern detection across sessions
+- **Intelligent Typing Coach**
   - Adaptive practice recommendations
-
-- **GUI Version**
-  - Transition from terminal UI to a graphical interface (Tkinter / PyQt / Web)
+  - Pattern detection across sessions
 
 - **Cloud Deployment**
   - User accounts
   - Cross-device progress syncing
-  - Leaderboards and performance stats
+  - Leaderboards and shared stats
 
---- 
+---
 
-**Author:** Sanika Surose   
-**Current version:** v1.4.0  
-**Next milestone:** v2.0.0 → GUI-based typing application  
-**Long-term goal:** cloud-hosted, AI-assisted typing platform  
+**Author:** Sanika Surose  
+**Current version:** v2.0.0  
+**Status:** Stable — Full GUI Migration  
+**Next milestone:** v2.x → practice-driven training & intelligence  
+**Long-term goal:** cloud-hosted, AI-assisted typing platform
