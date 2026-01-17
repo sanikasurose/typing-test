@@ -2,7 +2,6 @@
 # Description: Contains the graphical user interface code for the typing test application
 # Author: Sanika Surose
 
-from re import T
 import customtkinter as ctk
 import tkinter as tk
 import engine
@@ -17,16 +16,35 @@ Tkinter Notes:
 ctk.set_appearance_mode("dark")                                     # set the appearance mode to dark (tuple of different colors)
 ctk.set_default_color_theme("dark-blue")                            # set the default color theme to dark-blue
 
+# -- Screen State Constants --
+class ScreenState:
+    """Explicit screen state constants for UI state management."""
+    START = "start"
+    TYPING = "typing"
+    RESULTS = "results"
+    PROGRESS = "progress"
+
 
 class TypingTest: 
     """
-    App controller; owns the window and switches between screens
+    Central application controller managing screen lifecycle and navigation.
+    
+    Responsibilities:
+    - Own the main application window (CustomTkinter CTk)
+    - Create and manage all screen instances
+    - Coordinate screen transitions
+    - Track active screen state
+    - Implement show/hide pattern for screen switching
+    
+    Architecture Pattern: Controller Pattern
     """
-    # __init__: initializes the main application window and creates all screen components
     def __init__(self): 
         self.root = ctk.CTk()                                       
-        self.root.title("Typing Test v2.0.0")                       
+        self.root.title("Typing Test v2.0.1")                       
         self.root.geometry("900x500")
+
+        # Screen state tracking
+        self.current_screen = None
 
         # Screens
         self.start_screen = StartScreen(self)
@@ -40,31 +58,35 @@ class TypingTest:
         self.start_screen.start_button.focus_set()
         self.root.mainloop()
 
-    # show_start: shows the start screen
     def show_start(self): 
+        """Transition to start screen (application entry point)."""
         self._hide_all()
         self.start_screen.show()
+        self.current_screen = ScreenState.START
 
-    # show_typing: shows the typing screen
     def show_typing(self): 
+        """Transition to typing screen (creates new session)."""
         self._hide_all()
         self.typing_screen.start_test()
         self.typing_screen.show()
+        self.current_screen = ScreenState.TYPING
 
-    # show_results: shows the results screen
     def show_results(self, session): 
+        """Transition to results screen with session data."""
         self._hide_all()
         self.results_screen.load_session(session)
         self.results_screen.show()
+        self.current_screen = ScreenState.RESULTS
 
-    # show_progress: shows the progress screen
     def show_progress(self):
+        """Transition to progress screen (refreshes stats)."""
         self._hide_all()
         self.progress_screen.refresh()
         self.progress_screen.show()
+        self.current_screen = ScreenState.PROGRESS
 
-    # helper function to hide all
     def _hide_all(self):
+        """Utility method to hide all screens before showing a new one."""
         self.start_screen.hide()
         self.typing_screen.hide()
         self.results_screen.hide()
@@ -73,9 +95,22 @@ class TypingTest:
 
 class StartScreen: 
     """
-    Contains the code to display the welcome screen with a start button to begin the typing test
+    Welcome screen and application entry point.
+    
+    Responsibilities:
+    - Display application title
+    - Provide "Start" button to begin typing test
+    - Initialize user session flow
+    
+    UI Elements:
+    - Title label: "Typing Test"
+    - Start button (triggers app.show_typing())
+    
+    Lifecycle:
+    - Created once during TypingTest.__init__()
+    - Shown on application launch
+    - Hidden when transitioning to typing screen
     """
-    # __init__: initializes the start screen with title and start button
     def __init__(self, app): 
         self.app = app
         self.frame = ctk.CTkFrame(app.root)
@@ -86,20 +121,50 @@ class StartScreen:
         self.start_button = ctk.CTkButton(self.frame, text="Start", width=200, height=40, command=self.app.show_typing)
         self.start_button.pack(pady=30)
 
-    # show: displays the start screen frame
     def show(self):
+        """Display the start screen frame."""
         self.frame.pack(fill="both", expand=True)
 
-    # hide: hides the start screen frame
     def hide(self):
+        """Hide the start screen frame."""
         self.frame.pack_forget()
 
 
 class TypingScreen: 
     """
-    Contains the code to display the typing screen
+    Active typing test interface with real-time feedback.
+    
+    Responsibilities:
+    - Display target text with per-character color coding
+    - Handle keyboard input events
+    - Update live WPM calculation
+    - Manage typing session lifecycle
+    - Transition to results screen on completion
+    
+    UI Elements:
+    - Title: "Type the text below"
+    - Text display widget (tk.Text) with character-level coloring:
+      - Green: correct characters
+      - Red: incorrect characters
+      - Gray: untyped characters
+    - Live WPM stat label (updates every 500ms)
+    
+    Key Methods:
+    - start_test(): Creates new session via engine.create_session()
+    - on_key_press(): Processes keystrokes through engine.process_key()
+    - update_display(): Renders character states via engine.build_char_states()
+    - update_wpm(): Polls engine.calculate_wpm() every 500ms
+    
+    Event Handling:
+    - Binds <Key> events when shown
+    - Unbinds when hidden to prevent input leakage
+    - Converts Tkinter key events to engine-compatible format
+    
+    Session Management:
+    - Owns self.session dictionary (created by engine)
+    - Saves session via engine.save_session() on completion
+    - Passes session to results screen on transition
     """
-    # __init__: intializes the typing screen
     def __init__(self, app): 
         self.app = app
         self.session = None
@@ -121,22 +186,24 @@ class TypingScreen:
         self.stats_label = ctk.CTkLabel(self.frame, text="WPM: 0", font=ctk.CTkFont(size=16))
         self.stats_label.pack(pady=10)
 
-    # ---- Lifecycle ----
     def start_test(self):
+        """Create new session and initialize display."""
         self.session = engine.create_session()
         self.update_display()
         self.update_wpm()
 
     def show(self):
+        """Display screen and bind keyboard events."""
         self.frame.pack(fill="both", expand=True)
         self.app.root.bind("<Key>", self.on_key_press)
 
     def hide(self):
+        """Hide screen and unbind keyboard events."""
         self.app.root.unbind("<Key>")
         self.frame.pack_forget()
 
-    # ---- Input Handling ----
     def on_key_press(self, event):
+        """Process keyboard input and update session state."""
         if not self.session or not self.frame.winfo_ismapped():
             return
 
@@ -157,8 +224,8 @@ class TypingScreen:
             engine.save_session(self.session)
             self.app.show_results(self.session)
 
-    # ---- UI Updates ----
     def update_display(self):
+        """Render character states with color coding."""
         states = engine.build_char_states(self.session["target_text"], self.session["current_text"])
 
         self.text_display.config(state=tk.NORMAL)
@@ -170,23 +237,53 @@ class TypingScreen:
         self.text_display.config(state=tk.DISABLED)
 
     def update_wpm(self):
+        """Update WPM display every 500ms while test is active."""
         if not self.session["finished"]:
             wpm = engine.calculate_wpm(self.session)
             self.stats_label.configure(text=f"WPM: {wpm}")
             self.app.root.after(500, self.update_wpm)
 
-    def show_results(self):
-        acc = engine.calculate_accuracy(self.session)
-        wpm = engine.calculate_wpm(self.session)
-
-        self.stats_label.configure(text=f"Done! WPM: {engine.calculate_wpm(self.session)} | Accuracy: {acc}% | Press Enter for new test")
-
 
 class ResultsScreen: 
     """
-    Results screen definition
+    Display comprehensive test results and performance feedback.
+    
+    Responsibilities:
+    - Show final WPM and accuracy
+    - Display performance profile classification
+    - Show typing consistency analysis
+    - List weak keys (most frequently mistyped characters)
+    - Display average key delay
+    - Provide actionable improvement tip
+    - Transition to progress screen
+    
+    UI Elements:
+    - Title: "Performance Feedback"
+    - Multi-line text label displaying:
+      - WPM
+      - Accuracy percentage
+      - Performance profile
+      - Typing consistency
+      - Weak keys list
+      - Average key delay
+      - Actionable tip
+    - Continue button (triggers app.show_progress())
+    
+    Key Methods:
+    - load_session(session): Populates display with session data
+    - Uses multiple engine analytics functions:
+      - engine.calculate_wpm()
+      - engine.calculate_accuracy()
+      - engine.get_performance_profile()
+      - engine.get_speed_feedback()
+      - engine.get_weak_keys()
+      - engine.get_average_key_delay()
+      - engine.get_actionable_tip()
+    
+    Navigation:
+    - Continue button → Progress screen
+    - Enter key → Progress screen (keyboard shortcut)
     """
-    # __init__: constructor function
     def __init__(self, app):
         self.app = app
         self.session = None
@@ -202,6 +299,7 @@ class ResultsScreen:
         self.continue_button.pack(pady=30)
 
     def load_session(self, session): 
+        """Load session data and populate display with analytics."""
         self.session = session
 
         wpm = engine.calculate_wpm(session)
@@ -226,20 +324,47 @@ class ResultsScreen:
         self.body.configure(text=text)
 
     def show(self):
+        """Display screen and bind Enter key for navigation."""
         self.frame.pack(fill="both", expand=True)
         self.app.root.bind("<Return>", self._continue)
 
     def hide(self):
+        """Hide screen and unbind Enter key."""
         self.app.root.unbind("<Return>")
         self.frame.pack_forget()
 
     def _continue(self, event=None):
+        """Handle Continue button or Enter key press."""
         self.app.show_progress()
 
 
 class ProgressScreen: 
     """
-    Loads the progress/feedback screen
+    Display long-term progress statistics across all sessions.
+    
+    Responsibilities:
+    - Show aggregate statistics from sessions.json
+    - Display total tests completed
+    - Show best WPM achieved
+    - Display average WPM and accuracy
+    - Provide "New Test" action to restart flow
+    
+    UI Elements:
+    - Title: "Your Progress"
+    - Multi-line stats label:
+      - Total Tests
+      - Best WPM
+      - Average WPM
+      - Average Accuracy
+    - New Test button (triggers app.show_typing())
+    
+    Key Methods:
+    - refresh(): Loads latest stats via engine.get_progress_stats()
+    - Called automatically when screen is shown
+    
+    Data Source:
+    - Reads from sessions.json via engine.get_progress_stats()
+    - Handles empty state ("No data yet.")
     """
     def __init__(self, app): 
         self.app = app
@@ -255,6 +380,7 @@ class ProgressScreen:
         self.continue_button.pack(pady=30)
 
     def refresh(self):
+        """Load latest progress statistics from engine."""
         stats = engine.get_progress_stats()
         if not stats:
             self.stats_label.configure(text="No data yet.")
@@ -269,9 +395,11 @@ class ProgressScreen:
         self.stats_label.configure(text=text)
 
     def show(self):
+        """Display the progress screen."""
         self.frame.pack(fill="both", expand=True)
 
     def hide(self):
+        """Hide the progress screen."""
         self.frame.pack_forget()
 
 # Run App
